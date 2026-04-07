@@ -48,6 +48,7 @@ class ChatRequest(BaseModel):
     selected_district: str = Field(default="", description="선택된 법정동")
     selected_month: str = Field(default="", description="기준 년월 (YYYYMM)")
     current_tab: str = Field(default="", description="현재 탭")
+    page_context: str = Field(default="", description="현재 페이지에서 사용자가 보고 있는 상세 컨텍스트")
     chat_history: list[dict] = Field(default=[], description="이전 대화 이력 (role/content)")
 
 
@@ -117,6 +118,7 @@ async def chat(req: ChatRequest):
             "selected_district": req.selected_district,
             "selected_month": req.selected_month,
             "current_tab": req.current_tab,
+            "page_context": req.page_context,
             "response_text": "",
             "chart_data": {},
             "cost_log": [],

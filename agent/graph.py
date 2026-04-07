@@ -23,6 +23,7 @@ class AgentState(TypedDict):
     selected_district: str
     selected_month: str
     current_tab: str
+    page_context: str        # 현재 페이지에서 사용자가 보고 있는 상세 컨텍스트
     response_text: str
     chart_data: dict
     cost_log: Annotated[list, add]
@@ -108,12 +109,15 @@ def simple_node(state: AgentState) -> dict:
     user_msg = state["messages"][-1]
 
     context = f"지역: {state.get('selected_district', '미선택')}, 기준월: {state.get('selected_month', '최신')}"
+    page_ctx = state.get('page_context', '')
 
     system_prompt = (
         f"당신은 데이터 조회 도우미입니다. 도구를 사용해 정확한 데이터를 조회하세요.\n"
-        f"컨텍스트: {context}\n\n"
+        f"컨텍스트: {context}\n"
+        f"[사용자가 현재 보고 있는 화면]\n{page_ctx}\n\n"
         f"[필수 규칙]\n"
-        f"- 절대로 사용자에게 지역이나 기준월을 되묻지 마세요. 이전 대화에서 언급된 지역을 사용하세요.\n"
+        f"- 절대로 사용자에게 지역이나 기준월을 되묻지 마세요. 이전 대화 또는 현재 화면 컨텍스트에서 파악하세요.\n"
+        f"- 사용자가 '이거', '여기', '이 동네' 등 대명사를 쓰면 현재 화면의 지역/데이터를 참조하세요.\n"
         f"- 정보가 부족하면 도구를 사용해 직접 조회하세요.\n"
         f"- 분석 시 유동인구 + 카드매출 + 소득 데이터를 함께 교차 분석하세요.\n"
         f"- 업종 추천 시 해당 지역의 카드매출 업종별 비중을 반드시 조회하세요."
@@ -136,12 +140,15 @@ def analysis_node(state: AgentState) -> dict:
     model = _get_model("mini").bind_tools(ALL_TOOLS)
 
     context = f"지역: {state.get('selected_district', '미선택')}, 기준월: {state.get('selected_month', '최신')}"
+    page_ctx = state.get('page_context', '')
 
     system_prompt = (
         f"당신은 데이터 분석 전문가입니다. 도구를 사용해 데이터를 조회하고 비교/분석하세요.\n"
-        f"컨텍스트: {context}\n\n"
+        f"컨텍스트: {context}\n"
+        f"[사용자가 현재 보고 있는 화면]\n{page_ctx}\n\n"
         f"[필수 규칙]\n"
-        f"- 절대로 사용자에게 지역이나 기준월을 되묻지 마세요. 이전 대화에서 언급된 지역을 사용하세요.\n"
+        f"- 절대로 사용자에게 지역이나 기준월을 되묻지 마세요. 이전 대화 또는 현재 화면 컨텍스트에서 파악하세요.\n"
+        f"- 사용자가 '이거', '여기', '이 동네' 등 대명사를 쓰면 현재 화면의 지역/데이터를 참조하세요.\n"
         f"- 정보가 부족하면 도구를 사용해 직접 조회하세요.\n"
         f"- 분석 시 유동인구 + 카드매출 + 소득 데이터를 함께 교차 분석하세요.\n"
         f"- 업종 추천 시 해당 지역의 카드매출 업종별 비중을 반드시 조회하세요."
@@ -164,12 +171,15 @@ def complex_node(state: AgentState) -> dict:
     model = _get_model("full").bind_tools(ALL_TOOLS)
 
     context = f"지역: {state.get('selected_district', '미선택')}, 기준월: {state.get('selected_month', '최신')}"
+    page_ctx = state.get('page_context', '')
 
     system_prompt = (
         f"당신은 상권/부동산/마케팅 데이터 분석 전문가입니다. 도구를 적극 활용하여 종합 분석, 시뮬레이션, 예측을 수행하세요.\n"
-        f"컨텍스트: {context}\n\n"
+        f"컨텍스트: {context}\n"
+        f"[사용자가 현재 보고 있는 화면]\n{page_ctx}\n\n"
         f"[필수 규칙]\n"
-        f"- 절대로 사용자에게 지역이나 기준월을 되묻지 마세요. 이전 대화에서 언급된 지역을 사용하세요.\n"
+        f"- 절대로 사용자에게 지역이나 기준월을 되묻지 마세요. 이전 대화 또는 현재 화면 컨텍스트에서 파악하세요.\n"
+        f"- 사용자가 '이거', '여기', '이 동네' 등 대명사를 쓰면 현재 화면의 지역/데이터를 참조하세요.\n"
         f"- 정보가 부족하면 도구를 사용해 직접 조회하세요.\n"
         f"- 분석 시 유동인구 + 카드매출 + 소득 데이터를 함께 교차 분석하세요.\n"
         f"- 업종 추천 시 해당 지역의 카드매출 업종별 비중을 반드시 조회하세요.\n"
