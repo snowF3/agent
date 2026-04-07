@@ -109,8 +109,17 @@ def simple_node(state: AgentState) -> dict:
 
     context = f"지역: {state.get('selected_district', '미선택')}, 기준월: {state.get('selected_month', '최신')}"
 
+    system_prompt = (
+        f"당신은 데이터 조회 도우미입니다. 도구를 사용해 정확한 데이터를 조회하세요.\n"
+        f"컨텍스트: {context}\n\n"
+        f"[필수 규칙]\n"
+        f"- 절대로 사용자에게 지역이나 기준월을 되묻지 마세요. 이전 대화에서 언급된 지역을 사용하세요.\n"
+        f"- 정보가 부족하면 도구를 사용해 직접 조회하세요.\n"
+        f"- 분석 시 유동인구 + 카드매출 + 소득 데이터를 함께 교차 분석하세요.\n"
+        f"- 업종 추천 시 해당 지역의 카드매출 업종별 비중을 반드시 조회하세요."
+    )
     response = model.invoke([
-        SystemMessage(content=f"당신은 데이터 조회 도우미입니다. 도구를 사용해 정확한 데이터를 조회하세요.\n컨텍스트: {context}"),
+        SystemMessage(content=system_prompt),
         *state["messages"],
     ])
 
@@ -128,8 +137,17 @@ def analysis_node(state: AgentState) -> dict:
 
     context = f"지역: {state.get('selected_district', '미선택')}, 기준월: {state.get('selected_month', '최신')}"
 
+    system_prompt = (
+        f"당신은 데이터 분석 전문가입니다. 도구를 사용해 데이터를 조회하고 비교/분석하세요.\n"
+        f"컨텍스트: {context}\n\n"
+        f"[필수 규칙]\n"
+        f"- 절대로 사용자에게 지역이나 기준월을 되묻지 마세요. 이전 대화에서 언급된 지역을 사용하세요.\n"
+        f"- 정보가 부족하면 도구를 사용해 직접 조회하세요.\n"
+        f"- 분석 시 유동인구 + 카드매출 + 소득 데이터를 함께 교차 분석하세요.\n"
+        f"- 업종 추천 시 해당 지역의 카드매출 업종별 비중을 반드시 조회하세요."
+    )
     response = model.invoke([
-        SystemMessage(content=f"당신은 데이터 분석 전문가입니다. 도구를 사용해 데이터를 조회하고 비교/분석하세요.\n컨텍스트: {context}"),
+        SystemMessage(content=system_prompt),
         *state["messages"],
     ])
 
@@ -147,8 +165,19 @@ def complex_node(state: AgentState) -> dict:
 
     context = f"지역: {state.get('selected_district', '미선택')}, 기준월: {state.get('selected_month', '최신')}"
 
+    system_prompt = (
+        f"당신은 상권/부동산/마케팅 데이터 분석 전문가입니다. 도구를 적극 활용하여 종합 분석, 시뮬레이션, 예측을 수행하세요.\n"
+        f"컨텍스트: {context}\n\n"
+        f"[필수 규칙]\n"
+        f"- 절대로 사용자에게 지역이나 기준월을 되묻지 마세요. 이전 대화에서 언급된 지역을 사용하세요.\n"
+        f"- 정보가 부족하면 도구를 사용해 직접 조회하세요.\n"
+        f"- 분석 시 유동인구 + 카드매출 + 소득 데이터를 함께 교차 분석하세요.\n"
+        f"- 업종 추천 시 해당 지역의 카드매출 업종별 비중을 반드시 조회하세요.\n"
+        f"- 시뮬레이션 시 여러 도구를 순차적으로 호출하세요: 1) query_population 2) query_card_sales 3) query_income 4) simulate_business\n"
+        f"- 시뮬레이션 결과가 0이면 직접 유동인구 x 업종비율 x 포획률로 계산하세요."
+    )
     response = model.invoke([
-        SystemMessage(content=f"당신은 상권/부동산/마케팅 데이터 분석 전문가입니다. 도구를 적극 활용하여 종합 분석, 시뮬레이션, 예측을 수행하세요.\n컨텍스트: {context}"),
+        SystemMessage(content=system_prompt),
         *state["messages"],
     ])
 

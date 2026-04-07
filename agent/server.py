@@ -11,7 +11,7 @@ load_dotenv()
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage as LCAIMessage
 
 from agent.graph import agent
 from agent.cost_tracker import CostTracker
@@ -48,6 +48,7 @@ class ChatRequest(BaseModel):
     selected_district: str = Field(default="", description="선택된 법정동")
     selected_month: str = Field(default="", description="기준 년월 (YYYYMM)")
     current_tab: str = Field(default="", description="현재 탭")
+    chat_history: list[dict] = Field(default=[], description="이전 대화 이력 (role/content)")
 
 
 class CostDetail(BaseModel):
@@ -98,9 +99,19 @@ async def chat(req: ChatRequest):
     if cost_tracker.is_over_limit():
         raise HTTPException(429, f"일일 비용 한도 초과 (${cost_tracker.daily_limit})")
 
+    # 이전 대화 이력을 LangChain 메시지로 변환
+    history_messages = []
+    for msg in req.chat_history:
+        role = msg.get("role", "")
+        content = msg.get("content", "")
+        if role == "user":
+            history_messages.append(HumanMessage(content=content))
+        elif role == "assistant":
+            history_messages.append(LCAIMessage(content=content))
+
     try:
         result = agent.invoke({
-            "messages": [HumanMessage(content=req.query)],
+            "messages": history_messages + [HumanMessage(content=req.query)],
             "query_type": "",
             "query_intent": "",
             "selected_district": req.selected_district,

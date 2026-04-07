@@ -282,9 +282,30 @@ def simulate_business(district_name: str, business_type: str = "카페", seats: 
           AND STANDARD_YEAR_MONTH = (SELECT MAX(STANDARD_YEAR_MONTH) FROM read_parquet('{card_path}'))
     """).fetchdf()
 
+    # 업종 매출 비중 (최소 3%)
     biz_ratio = 0.05
     if not card.empty and card["TOTAL_SALES"].values[0] > 0:
         biz_ratio = card["biz_sales"].values[0] / card["TOTAL_SALES"].values[0]
+    biz_ratio = max(biz_ratio, 0.03)
+
+    # population_time_agg가 비어있으면 population_agg에서 폴백
+    if pop_time.empty:
+        pop_agg_path = _parquet_path("population_agg")
+        pop_agg = conn.execute(f"""
+            SELECT RESIDENTIAL_POPULATION + WORKING_POPULATION + VISITING_POPULATION as total_pop
+            FROM read_parquet('{pop_agg_path}')
+            WHERE DISTRICT_CODE = '{dc}'
+              AND STANDARD_YEAR_MONTH = (SELECT MAX(STANDARD_YEAR_MONTH) FROM read_parquet('{pop_agg_path}'))
+        """).fetchdf()
+
+        if not pop_agg.empty:
+            total_daily_pop = int(pop_agg["total_pop"].values[0])
+            num_slots = 7
+            per_slot = total_daily_pop // num_slots
+            pop_time = pd.DataFrame({
+                "TIME_SLOT": [f"T{i}" for i in range(num_slots)],
+                "total_pop": [per_slot] * num_slots,
+            })
 
     capture_rate = 0.05
     time_results = []
