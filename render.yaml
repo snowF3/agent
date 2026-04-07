@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: xray-agent
+    runtime: python
+    branch: prod
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn agent.server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: DATA_DIR
+        value: ./processed_data
+      - key: DAILY_COST_LIMIT
+        value: 5.00
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    autoDeploy: true

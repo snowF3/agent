@@ -9,7 +9,7 @@ from langchain_core.tools import tool
 from pathlib import Path
 
 # 데이터 디렉토리 (환경변수 또는 기본값)
-DATA_DIR = Path(os.environ.get("DATA_DIR", Path(__file__).resolve().parent.parent.parent.parent / "streamlit" / "processed_data"))
+DATA_DIR = Path(os.environ.get("DATA_DIR", Path(__file__).resolve().parent.parent.parent / "processed_data"))
 
 
 def _get_conn():

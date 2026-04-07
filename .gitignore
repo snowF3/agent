@@ -6,6 +6,5 @@ venv/
 *.egg-info/
 dist/
 build/
-processed_data/
-*.parquet
+# processed_data와 parquet은 배포 시 필요하므로 포함
 .pytest_cache/
