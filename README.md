@@ -2,6 +2,13 @@
 
 LangGraph + OpenAI 기반 대화형 데이터 분석 에이전트
 
+## 배포 URL
+
+- **Agent API**: https://agent-3lht.onrender.com
+- **Dashboard**: (Streamlit Cloud 배포 후 업데이트)
+- **API Health**: https://agent-3lht.onrender.com/health
+- **API Docs**: https://agent-3lht.onrender.com/docs
+
 ## 구조
 
 ```
